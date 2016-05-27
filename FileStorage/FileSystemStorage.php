@@ -163,15 +163,26 @@ class FileSystemStorage implements FileStorageInterface
 
         $ext = substr($originalName,strrpos ($originalName,'.')+1);
 
-        if ((in_array($fileData['mimeType'], array('image/png', 'image/jpeg', 'image/pjpeg')) ||
-            in_array ($ext,array ('jpeg','jpg','png')))
-            && function_exists('getimagesize')
-        ) {
-            list($width, $height, $type) = @getimagesize($fullFileName);
-            $fileData = array_merge($fileData, array(
-                'width' => $width, 'height' => $height
-            ));
-        }
+         if (function_exists('getimagesize') && (
+                    in_array($fileData['mimeType'], array('image/gif', 'image/png', 'image/jpeg', 'image/pjpeg'))
+                 || in_array($ext, array('gif', 'jpeg', 'jpg', 'png'))
+             )) {
+ 
+             $imgDimensions = @getimagesize($fullFileName);
+             if ($imgDimensions !== false) {
+                 $fileData['width'] = $imgDimensions['width'];
+                 $fileData['height'] = $imgDimensions['height'];
+             }
+ 
+         } elseif (function_exists('simplexml_load_file') && ($fileData['mimeType'] == 'image/svg+xml' || $ext == 'svg')) {
+ 
+             $xml = simplexml_load_file($fullFileName);
+             if (isset($xml['width']) && isset($xml['height'])) {
+                 $fileData['width'] = substr($xml['width'], 0, -2);
+                 $fileData['height'] = substr($xml['height'],0, -2);
+             }
+         }
+
 
         return $fileData;
     }
