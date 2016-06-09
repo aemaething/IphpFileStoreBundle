@@ -170,16 +170,16 @@ class FileSystemStorage implements FileStorageInterface
  
              $imgDimensions = @getimagesize($fullFileName);
              if ($imgDimensions !== false) {
-                 $fileData['width'] = $imgDimensions['width'];
-                 $fileData['height'] = $imgDimensions['height'];
+                 $fileData['width'] = $imgDimensions[0];
+                 $fileData['height'] = $imgDimensions[1];
              }
  
          } elseif (function_exists('simplexml_load_file') && ($fileData['mimeType'] == 'image/svg+xml' || $ext == 'svg')) {
  
-             $xml = simplexml_load_file($fullFileName);
+             $xml = @simplexml_load_file($fullFileName);
              if (isset($xml['width']) && isset($xml['height'])) {
                  $fileData['width'] = substr($xml['width'], 0, -2);
-                 $fileData['height'] = substr($xml['height'],0, -2);
+                 $fileData['height'] = substr($xml['height'], 0, -2);
              }
          }
 
